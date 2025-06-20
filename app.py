@@ -77,6 +77,18 @@ def extract_display_name(title):
     return title.split('👤')[0].strip()
 
 # ================================
+# Centralized Body Styles
+# ================================
+# Define a variable for the body styles
+common_body_styles = """
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        background: #e6e6fa; /* Light purple */
+        padding: 20px;
+    }
+"""
+
+# ================================
 # Common HTML Snippets for Buttons and Styles
 # ================================
 common_button_styles = """
@@ -257,7 +269,7 @@ def index():
         <title>Realm</title>
         {common_head_html}
         <style>
-            body {{ font-family: Arial; background: #e6e6fa; padding: 20px; }} /* Changed to light purple */
+            {common_body_styles} /* Centralized body styles */
             .card {{
                 background: white;
                 padding: 15px;
@@ -362,7 +374,7 @@ def series(imdb_id):
         <title>Series IMDb ID: {{{{ imdb_id }}}} Stream Selection</title>
         {common_head_html}
         <style>
-            body {{ font-family: Arial; background: #e6e6fa; padding: 20px; }} /* Changed to light purple */
+            {common_body_styles} /* Centralized body styles */
             .error {{ color: red; }}
             {common_button_styles}
             /* Specific style for season/episode input widths if needed, but flex should handle it */
@@ -432,7 +444,7 @@ def fetch_and_display_streams(stream_url, imdb_id, is_series=False, season=None,
         <title>Streams</title>
         {common_head_html}
         <style>
-            body {{ font-family: Arial; background: #e6e6fa; padding: 20px; }} /* Changed to light purple */
+            {common_body_styles} /* Centralized body styles */
             .card {{
                 background: white;
                 padding: 15px;
