@@ -109,7 +109,6 @@ common_button_styles = """
         margin-right: 10px;
         margin-top: 5px; /* Add some space above if needed */
     }
-    /* NEW STYLES FOR SEARCH INPUT AND BUTTON */
     .search-form {
         display: flex; /* Make input and button sit side-by-side */
         gap: 10px; /* Space between input and button */
@@ -118,7 +117,9 @@ common_button_styles = """
         flex-wrap: wrap; /* Allow wrapping on small screens */
     }
 
-    .search-form input[type="text"] {
+    /* Updated selector to include input[type="number"] */
+    .search-form input[type="text"],
+    .search-form input[type="number"] {
         flex-grow: 1; /* Allow input to take available space */
         padding: 12px 18px; /* More padding for a softer look */
         border: 1px solid #ddd; /* Light grey border */
@@ -126,10 +127,11 @@ common_button_styles = """
         font-size: 16px;
         box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* Subtle inner shadow */
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        min-width: 200px; /* Ensure input doesn't get too small */
+        min-width: 150px; /* Adjusted min-width for number inputs too */
     }
 
-    .search-form input[type="text"]:focus {
+    .search-form input[type="text"]:focus,
+    .search-form input[type="number"]:focus { /* Added focus for number inputs */
         border-color: #007bff; /* Highlight on focus */
         box-shadow: 0 0 0 3px rgba(0,123,255,0.25); /* Blue glow on focus */
         outline: none; /* Remove default outline */
@@ -151,6 +153,11 @@ common_button_styles = """
     .search-form button[type="submit"]:hover {
         background-color: #0056b3; /* Darker blue on hover */
         transform: translateY(-1px); /* Slight lift */
+    }
+
+    .header-container {
+        text-align: center; /* Centers inline-block elements like h1 and the home button */
+        margin-bottom: 20px; /* Adds space below the header section */
     }
 """
 
@@ -269,9 +276,12 @@ def index():
         </style>
     </head>
     <body>
-        <h1>Realm</h1>
-        {common_buttons_html}
-        <form method="POST" class="search-form"> <input type="text" name="query" placeholder="Enter movie or series name" required value="{{{{ query or '' }}}}">
+        <div class="header-container">
+            <h1>Realm</h1>
+            {common_buttons_html}
+        </div>
+        <form method="POST" class="search-form">
+            <input type="text" name="query" placeholder="Enter movie or series name" required value="{{{{ query or '' }}}}">
             <button type="submit">Search</button>
         </form>
 
@@ -343,19 +353,34 @@ def series(imdb_id):
 
     # For GET request (initial page load) or if there's a validation error
     return render_template_string(f"""
-    <html><body>
-        <h1>Series IMDb ID: {{{{ imdb_id }}}}</h1>
-        {common_buttons_html}
-        <form method="POST">
-            {{% if validation_error %}}
+    <html>
+    <head>
+        <title>Series IMDb ID: {{{{ imdb_id }}}} Stream Selection</title>
+        {common_head_html}
+        <style>
+            body {{ font-family: Arial; background: #f4f4f4; padding: 20px; }}
+            .error {{ color: red; }} 
+            {common_button_styles} 
+            /* Specific style for season/episode input widths if needed, but flex should handle it */
+            .search-form input[type="number"] {{
+                max-width: 120px; /* Adjust if needed for number inputs */
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header-container">
+            <h1>Series IMDb ID: {{{{ imdb_id }}}}</h1>
+            {common_buttons_html}
+        </div>
+        <form method="POST" class="search-form"> {{% if validation_error %}}
                 <div class="error" style="color: red; margin-bottom: 10px;">{{{{ validation_error }}}}</div>
             {{% endif %}}
             <input type="number" name="season" placeholder="Season" required value="{{{{ season }}}}" min="1">
             <input type="number" name="episode" placeholder="Episode" required value="{{{{ episode }}}}" min="1">
             <button type="submit">Fetch Streams</button>
         </form>
-        <style> .error {{ color: red; }} {common_button_styles} </style>
-    </body></html>
+    </body>
+    </html>
     """, imdb_id=imdb_id, season=season, episode=episode, validation_error=validation_error)
 
 
@@ -427,11 +452,13 @@ def fetch_and_display_streams(stream_url, imdb_id, is_series=False, season=None,
         </script>
     </head>
     <body>
-        <h1>{{{{ 'Series' if is_series else 'Movie' }}}} IMDb ID: {{{{ imdb_id }}}}</h1>
-        {{% if is_series %}}
-            <div>Season: {{{{ season }}}} | Episode: {{{{ episode }}}}</div>
-        {{% endif %}}
-        {common_buttons_html}
+        <div class="header-container">
+            <h1>{{{{ 'Series' if is_series else 'Movie' }}}} IMDb ID: {{{{ imdb_id }}}}</h1>
+            {{% if is_series %}}
+                <div>Season: {{{{ season }}}} | Episode: {{{{ episode }}}}</div>
+            {{% endif %}}
+            {common_buttons_html}
+        </div>
 
         {{% if error %}}
             <div class="error">{{{{ error }}}}</div>
