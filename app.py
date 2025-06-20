@@ -523,4 +523,4 @@ def fetch_and_display_streams(stream_url, imdb_id, is_series=False, season=None,
 # Run the app
 # ================================
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

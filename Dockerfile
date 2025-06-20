@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Install any needed packages specified in requirements.txt
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the current directory contents into the container at /app
 COPY . .
@@ -14,8 +15,9 @@ COPY . .
 # Expose the port that Gunicorn will run on
 EXPOSE 8000
 
+ENV FLASK_ENV=production
+
 # Command to run the application using Gunicorn
-# Gunicorn is a production-ready WSGI HTTP Server.
-# We're binding to 0.0.0.0 to make it accessible from outside the container.
-# All necessary URLs and the API key will be passed via environment variables during 'docker run'.
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+# -w 4: Sets 4 worker processes (adjust based on your server's CPU cores, typically 2*CPU_CORES + 1).
+# -b 0.0.0.0:8000: Binds Gunicorn to all network interfaces on port 8000.
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:app"]

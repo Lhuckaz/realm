@@ -3,3 +3,11 @@
 .gitignore
 Dockerfile
 README.md
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+*.db
+.DS_Store
