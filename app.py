@@ -38,9 +38,9 @@ def load_trackers():
     try:
         print(f"Attempting to fetch trackers from: {TRACKERS_LIST_URL}")
         # Add a timeout to prevent the app from hanging indefinitely
-        response = requests.get(TRACKERS_LIST_URL, timeout=10) 
+        response = requests.get(TRACKERS_LIST_URL, timeout=10)
         response.raise_for_status() # Raise an HTTPError for bad responses (4xx or 5xx)
-        
+
         # Process the fetched content
         for line in response.text.splitlines():
             stripped_line = line.strip()
@@ -56,7 +56,7 @@ def load_trackers():
         print(f"An unexpected error occurred while loading trackers: {e}")
         print("No trackers will be used for this session.")
         trackers = [] # Explicitly set to empty list if other errors occur
-    
+
     return trackers
 
 # Initialize TRACKERS by loading from URL (or an empty list if unavailable)
@@ -115,6 +115,9 @@ common_button_styles = """
         margin-bottom: 20px;
         align-items: center; /* Vertically align them */
         flex-wrap: wrap; /* Allow wrapping on small screens */
+        max-width: 500px; /* Set a max width for the form container */
+        margin: 0 auto; /* This centers the block-level form horizontally */
+        justify-content: center; /* Centers items horizontally within the flex container, especially when wrapping */
     }
 
     /* Updated selector to include input[type="number"] */
@@ -212,7 +215,7 @@ def index():
                     # Use TMDB_API_BASE_URL from .env
                     external_ids_url = f"{TMDB_API_BASE_URL}{media_type}/{tmdb_id}/external_ids"
                     external_ids_params = {"api_key": TMDB_API_KEY}
-                    
+
                     try:
                         external_ids_response = requests.get(external_ids_url, params=external_ids_params)
                         external_ids_response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
@@ -254,7 +257,7 @@ def index():
         <title>Realm</title>
         {common_head_html}
         <style>
-            body {{ font-family: Arial; background: #f4f4f4; padding: 20px; }}
+            body {{ font-family: Arial; background: #e6e6fa; padding: 20px; }} /* Changed to light purple */
             .card {{
                 background: white;
                 padding: 15px;
@@ -284,7 +287,8 @@ def index():
             <input type="text" name="query" placeholder="Enter movie or series name" required value="{{{{ query or '' }}}}">
             <button type="submit">Search</button>
         </form>
-
+        <br />
+        <br />
         {{% if error %}}
             <div class="error">{{{{ error }}}}</div>
         {{% endif %}}
@@ -325,7 +329,7 @@ def streams(imdb_id):
 @app.route("/series/<imdb_id>", methods=["GET", "POST"])
 def series(imdb_id):
     validation_error = None
-    
+
     # Get values from form or set defaults
     season_str = request.form.get("season", "1")
     episode_str = request.form.get("episode", "1")
@@ -334,7 +338,7 @@ def series(imdb_id):
     try:
         season = int(season_str)
         episode = int(episode_str)
-        
+
         if season <= 0 or episode <= 0:
             validation_error = "Season and Episode numbers must be positive integers."
             # Set them back to '1' for display if invalid, or keep user input if that's preferred
@@ -358,12 +362,12 @@ def series(imdb_id):
         <title>Series IMDb ID: {{{{ imdb_id }}}} Stream Selection</title>
         {common_head_html}
         <style>
-            body {{ font-family: Arial; background: #f4f4f4; padding: 20px; }}
-            .error {{ color: red; }} 
-            {common_button_styles} 
+            body {{ font-family: Arial; background: #e6e6fa; padding: 20px; }} /* Changed to light purple */
+            .error {{ color: red; }}
+            {common_button_styles}
             /* Specific style for season/episode input widths if needed, but flex should handle it */
             .search-form input[type="number"] {{
-                max-width: 120px; /* Adjust if needed for number inputs */
+                max-width: 120px; /* Adjust if needed for number inputs, flex-grow is primary */
             }}
         </style>
     </head>
@@ -372,7 +376,8 @@ def series(imdb_id):
             <h1>Series IMDb ID: {{{{ imdb_id }}}}</h1>
             {common_buttons_html}
         </div>
-        <form method="POST" class="search-form"> {{% if validation_error %}}
+        <form method="POST" class="search-form">
+            {{% if validation_error %}}
                 <div class="error" style="color: red; margin-bottom: 10px;">{{{{ validation_error }}}}</div>
             {{% endif %}}
             <input type="number" name="season" placeholder="Season" required value="{{{{ season }}}}" min="1">
@@ -427,7 +432,7 @@ def fetch_and_display_streams(stream_url, imdb_id, is_series=False, season=None,
         <title>Streams</title>
         {common_head_html}
         <style>
-            body {{ font-family: Arial; background: #f4f4f4; padding: 20px; }}
+            body {{ font-family: Arial; background: #e6e6fa; padding: 20px; }} /* Changed to light purple */
             .card {{
                 background: white;
                 padding: 15px;
@@ -456,6 +461,8 @@ def fetch_and_display_streams(stream_url, imdb_id, is_series=False, season=None,
             <h1>{{{{ 'Series' if is_series else 'Movie' }}}} IMDb ID: {{{{ imdb_id }}}}</h1>
             {{% if is_series %}}
                 <div>Season: {{{{ season }}}} | Episode: {{{{ episode }}}}</div>
+                <br />
+                <br />
             {{% endif %}}
             {common_buttons_html}
         </div>
@@ -472,7 +479,7 @@ def fetch_and_display_streams(stream_url, imdb_id, is_series=False, season=None,
                     <div><b>InfoHash:</b> {{{{ stream.get('infoHash', 'N/A') }}}}</div>
                     {{% if stream.magnet_link %}}
                         <a href="{{{{ stream.magnet_link }}}}" class="magnet-button">🧲 Magnet Link</a>
-                        <button onclick="copyMagnet('{{{{ stream.magnet_link }}}}')">📋 Copy Magnet Link</button>
+                        <button onclick="copyMagnet('{{{{ stream.magnet_link }}}}')" class="magnet-button">📋 Copy Magnet Link</button>
                     {{% endif %}}
                 </div>
             {{% endfor %}}
