@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streams</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <div id="copyMessage" class="message-box">
+        Copied to clipboard!
+    </div>
+    <div id="messageBox" class="message-box">
+        Torrent added!
+    </div>
+    <div class="container">
+        <a href="{{ url_for('index') }}">
+            <h1>🎬 Realm</h1>
+        </a>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if movie %}
+        <h2>{{ movie.title }} ({{ movie.year }})</h2>
+
+        {% if movie.poster %}
+        <img src="{{ movie.poster }}" alt="{{ movie.title }}" style="width:200px; border-radius: 8px;">
+        {% endif %}
+
+        {% endif %}
+
+        <h3>{{ imdb_id }}</h3>
+        {% if is_series %}
+        <div>Season: {{ season }} | Episode: {{ episode }}</div>
+        {% endif %}
+
+        {% if streams %}
+        <div class="results">
+            {% for stream in streams %}
+            <div class="stream">
+                <h4>{{ stream.get('name', 'No Name') }}</h4>
+                <div><b>Title:</b> {{ stream.get('title', 'No Title').split('👤')[0].strip() }}</div>
+                <div>👤{{ stream.get('title').split('👤')[1].split('💾')[0].strip() }}</div>
+                <div>💾{{ stream.get('title').split('💾')[1].split('⚙️')[0].strip() }}</div>
+                <div>⚙️{{ stream.get('title').split('⚙️')[1].strip() }}</div>
+                <div><b>InfoHash:</b>
+                    <p>{{ stream.get('infoHash', 'N/A') }}</p>
+                </div>
+                {% if stream.magnet_link %}
+                <div class="options">
+                    <a href="{{ stream.magnet_link }}">
+                        <button>🧲 Magnet Link</button>
+                    </a>
+                    <button onclick="copyMagnet('{{ stream.magnet_link }}')" class="magnet-button">📋 Copy Magnet
+                        Link</button>
+                    {% if is_series %}
+                    <button
+                        onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}', '{{ season }}', '{{ item_title }}')">🚀
+                        Send to
+                        qBittorrent</button>
+                    {% else %}
+                    <button onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}')">🚀 Send to
+                        qBittorrent</button>
+                    {% endif %}
+
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No streams available.</p>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+
+</html>

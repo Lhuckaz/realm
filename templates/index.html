@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realm</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <a href="{{ url_for('index') }}">
+            <h1>🎬 Realm</h1>
+        </a>
+        <form method="POST" class="search-form">
+            <input type="text" name="query" placeholder="Enter movie or series name" required value="{{ query or '' }}">
+            <button type="submit">Search</button>
+        </form>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if search_results %}
+        <div class="results">
+            {% for item in search_results %}
+            {% if item.Type == 'movie' %}
+            {% set link = url_for('streams', imdb_id=item.imdbID) %}
+            {% elif item.Type == 'tv' %}
+            {% set link = url_for('series', imdb_id=item.imdbID, item_title=item.Title) %}
+            {% endif %}
+            <a href="{{ link }}">
+                <div class="movie">
+                    <img src="{{ item.Poster }}" alt="Poster">
+                    <div class="movie-info">
+                        <h3>{{ item.Title }} ({{ item.Year }})</h3>
+                        {% if item.Type == 'movie' %}
+                        <p>🎬 View Movie Streams</p>
+                        {% elif item.Type == 'tv' %}
+                        <p>📺 View Series Episodes</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

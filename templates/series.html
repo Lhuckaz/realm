@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Series</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <a href="{{ url_for('index') }}">
+            <h1>🎬 Realm</h1>
+        </a>
+        <h3>{{ imdb_id }}</h3>
+        <form method="POST" class="search-form">
+            {% if validation_error %}
+            <div class="error">{{ validation_error }}</div>
+            {% endif %}
+            <input type="number" name="season" placeholder="Season" required value="{{ season }}" min="1">
+            <input type="number" name="episode" placeholder="Episode" required value="{{ episode }}" min="1">
+            <button type="submit">Fetch Streams</button>
+        </form>
+    </div>
+</body>
+
+</html>
