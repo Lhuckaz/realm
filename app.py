@@ -166,7 +166,7 @@ def send_to_qb():
         'urls': magnet,
         'savepath': save_path
     }
-    #r = s.post(f"{QB_URL}/api/v2/torrents/add", data=data)
+    r = s.post(f"{QB_URL}/api/v2/torrents/add", data=data)
 
     if r.status_code == 200:
         return jsonify({'status': 'success'})

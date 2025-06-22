@@ -1,4 +1,10 @@
 /* Dark Mode, Mobile First */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     background-color: #121212;
     color: #e0e0e0;
@@ -172,45 +178,6 @@ form button {
     font-size: 0.9rem;
 }
 
-/* Message box styling */
-.message-box {
-    position: fixed;
-    /* Keep it in view even when scrolling */
-    top: 1rem;
-    /* Distance from the top of the viewport */
-    /* Default for mobile: center horizontally */
-    left: 50%;
-    transform: translateX(-50%);
-    width: fit-content;
-    /* Adjust width to content */
-    max-width: calc(100% - 2rem);
-    /* Max width for mobile, considering padding */
-
-    padding: 0.75rem 1.25rem;
-    /* Slightly more padding for better appearance */
-    background-color: #16a34a;
-    /* Green for success */
-    color: white;
-    border-radius: 0.375rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-    opacity: 0;
-    visibility: hidden;
-    z-index: 1000;
-    /* Ensure it's above other content */
-    text-align: center;
-}
-
-.message-box.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.message-box.error {
-    background-color: #dc2626;
-    /* Red for error */
-}
-
 @media (min-width: 768px) {
     .movie img {
         width: 100px;
@@ -223,19 +190,5 @@ form button {
 
     form button {
         width: 40%;
-    }
-}
-
-/* Media query for larger screens (e.g., tablets and desktops) */
-@media (min-width: 640px) {
-    .message-box {
-        left: auto;
-        /* Remove left centering */
-        transform: none;
-        /* Remove transform centering */
-        right: 1rem;
-        /* Position at the right */
-        max-width: 20rem;
-        /* Give it a fixed max-width on larger screens */
     }
 }
