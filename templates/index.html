@@ -12,7 +12,7 @@
 <body>
     <div class="container">
         <a href="{{ url_for('index') }}">
-            <h1>🎬 Realm</h1>
+            <h1>🧲🎬 Realm</h1>
         </a>
         <form method="POST" class="search-form">
             <input type="text" name="query" placeholder="Enter movie or series name" required value="{{ query or '' }}">
@@ -35,7 +35,11 @@
                 <div class="movie">
                     <img src="{{ item.Poster }}" alt="Poster">
                     <div class="movie-info">
-                        <h3>{{ item.Title }} ({{ item.Year }})</h3>
+                        <h3>{{ item.Title }}
+                            {% if item.Year %}
+                            ({{ item.Year }})
+                            {% endif %}
+                        </h3>
                         {% if item.Type == 'movie' %}
                         <p>🎬 View Movie Streams</p>
                         {% elif item.Type == 'tv' %}

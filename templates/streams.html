@@ -12,7 +12,7 @@
 <body>
     <div class="container">
         <a href="{{ url_for('index') }}">
-            <h1>🎬 Realm</h1>
+            <h1>🧲🎬 Realm</h1>
         </a>
 
         {% if error %}
@@ -38,11 +38,11 @@
             {% for stream in streams %}
             <div class="stream">
                 <h4>{{ stream.get('name', 'No Name') }}</h4>
-                <div><b>Title:</b> {{ stream.get('title', 'No Title').split('👤')[0].strip() }}</div>
+                <div class="breakline"><b>Title:</b> {{ stream.get('title', 'No Title').split('👤')[0].strip() }}</div>
                 <div>👤{{ stream.get('title').split('👤')[1].split('💾')[0].strip() }}</div>
                 <div>💾{{ stream.get('title').split('💾')[1].split('⚙️')[0].strip() }}</div>
                 <div>⚙️{{ stream.get('title').split('⚙️')[1].strip() }}</div>
-                <div><b>InfoHash:</b>
+                <div class="infohash"><b>InfoHash:</b>
                     <p>{{ stream.get('infoHash', 'N/A') }}</p>
                 </div>
                 {% if stream.magnet_link %}
