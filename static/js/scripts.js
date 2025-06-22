@@ -3,20 +3,21 @@ function updateButtonText(button, newText, isError = false) {
     button.textContent = newText;
     button.disabled = true; // Disable button to prevent multiple clicks while message is shown
 
-    // You might want to add a class for error styling if needed
-    if (isError) {
-        button.style.backgroundColor = '#f44336'; // Example: change color for error
-    } else {
-        button.style.backgroundColor = '#4CAF50'; // Example: change color for success
-    }
+    // Store original background color to revert to it properly
+    const originalBackgroundColor = getComputedStyle(button).backgroundColor;
 
+    if (isError) {
+        button.style.backgroundColor = '#f44336'; // Red for error
+    } else {
+        button.style.backgroundColor = '#4CAF50'; // Green for success
+    }
 
     setTimeout(() => {
         button.textContent = originalText;
         button.disabled = false; // Re-enable the button
-        // Revert button color to original if you changed it for success/error
-        button.style.backgroundColor = ''; // Clear inline style
-    }, 2000); // Revert after 2 seconds
+        // Revert button color to its original computed style
+        button.style.backgroundColor = originalBackgroundColor;
+    }, 3000); // Revert after 2 seconds
 }
 
 function copyMagnet(magnet, buttonElement) {
@@ -28,43 +29,25 @@ function copyMagnet(magnet, buttonElement) {
     });
 }
 
+// Unified function to send to qBittorrent for both movies and series
 function sendToQB(link, is_series, season, item_title, buttonElement) {
+    const requestBody = {
+        magnet: link,
+        is_series: is_series,
+    };
+
+    // Only add season and item_title if it's a series
+    if (is_series === 'True') { // Note: is_series comes as a string 'True' or 'False' from Jinja2
+        requestBody.season = season;
+        requestBody.item_title = item_title;
+    }
+
     fetch("/send_to_qb", {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            magnet: link,
-            is_series: is_series,
-            season: season,
-            item_title: item_title
-        })
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                updateButtonText(buttonElement, 'Sent!');
-            } else {
-                console.error(data.message);
-                updateButtonText(buttonElement, 'Send Failed!', true);
-            }
-        })
-        .catch(error => {
-            console.error('Error sending to qBittorrent:', error);
-            updateButtonText(buttonElement, 'Error!', true);
-        });
-}
-function sendMovieToQB(link, is_series, buttonElement) {
-    fetch("/send_to_qb", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            magnet: link,
-            is_series: is_series,
-        })
+        body: JSON.stringify(requestBody)
     })
         .then(res => res.json())
         .then(data => {

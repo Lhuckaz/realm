@@ -60,7 +60,7 @@
                         qBittorrent</button>
                     {% else %}
                     <button data-original-text="🚀 Send to qBittorrent"
-                        onclick="sendMovieToQB('{{ stream.magnet_link }}', '{{is_series}}', this)">🚀 Send to
+                        onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}', null, null, this)">🚀 Send to
                         qBittorrent</button>
                     {% endif %}
                 </div>
