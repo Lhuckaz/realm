@@ -30,10 +30,11 @@ function copyMagnet(magnet, buttonElement) {
 }
 
 // Unified function to send to qBittorrent for both movies and series
-function sendToQB(link, is_series, season, item_title, buttonElement) {
+function sendToQB(link, is_series, season, item_title, imdb_id, buttonElement) {
     const requestBody = {
         magnet: link,
         is_series: is_series,
+        imdb_id: imdb_id
     };
 
     // Only add season and item_title if it's a series

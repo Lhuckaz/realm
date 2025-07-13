@@ -55,12 +55,12 @@
                         Link</button>
                     {% if is_series %}
                     <button data-original-text="🚀 Send to qBittorrent"
-                        onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}', '{{ season }}', '{{ item_title }}', this)">🚀
+                        onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}', '{{ season }}', '{{ item_title }}', '{{ imdb_id }}', this)">🚀
                         Send to
                         qBittorrent</button>
                     {% else %}
                     <button data-original-text="🚀 Send to qBittorrent"
-                        onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}', null, null, this)">🚀 Send to
+                        onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}', null, null, '{{ imdb_id }}', this)">🚀 Send to
                         qBittorrent</button>
                     {% endif %}
                 </div>

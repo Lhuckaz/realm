@@ -132,46 +132,93 @@ def series(imdb_id, item_title):
     return render_template("series.html", imdb_id=imdb_id, season=season, episode=episode, validation_error=validation_error)
 
 
+def get_tmdb_info_from_imdb(imdb_id):
+    """
+    Get TMDB ID and media type from IMDb ID.
+    """
+    if not imdb_id.startswith("tt"):
+        return None, None
+
+    find_url = f"{TMDB_API_BASE_URL}find/{imdb_id}"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "external_source": "imdb_id"
+    }
+    response = requests.get(find_url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        if data.get("movie_results"):
+            return data["movie_results"][0]["id"], "movie"
+        elif data.get("tv_results"):
+            return data["tv_results"][0]["id"], "tv"
+    return None, None
+
+
+def get_tmdb_details(tmdb_id, media_type):
+    """
+    Get details from TMDb.
+    """
+    if not tmdb_id or not media_type:
+        return None
+
+    details_url = f"{TMDB_API_BASE_URL}{media_type}/{tmdb_id}"
+    params = {
+        "api_key": TMDB_API_KEY,
+        "language": "en-US"
+    }
+    response = requests.get(details_url, params=params)
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+
 # ----------------- Send to qBittorrent -----------------
 @app.route('/send_to_qb', methods=['POST'])
 def send_to_qb():
     magnet = request.json.get('magnet')
-    raw_is_series = request.json.get('is_series', False)
+    imdb_id = request.json.get('imdb_id')
+    is_series = request.json.get('is_series', False)
 
-    if isinstance(raw_is_series, str):
-        is_series = raw_is_series.lower() == 'true'
-    else:
-        is_series = bool(raw_is_series)
+    if not magnet or not imdb_id:
+        return jsonify({'status': 'error', 'message': 'Missing magnet link or IMDb ID'}), 400
 
-    if is_series:
+    tmdb_id, media_type = get_tmdb_info_from_imdb(imdb_id)
+    details = get_tmdb_details(tmdb_id, media_type)
+
+    if not details:
+        return jsonify({'status': 'error', 'message': 'Could not get details from TMDb'}), 400
+
+    if media_type == 'movie':
+        title = details.get('title', '').replace(":", " -")
+        year = details.get('release_date', '')[:4]
+        save_path_name = f"{title} ({year})" if year else title
+        save_path = f"/downloads/Filmes/{save_path_name}"
+    elif media_type == 'tv':
+        series_name = details.get('name', '').replace(":", " -")
         season = request.json.get('season')
-        series_name = request.json.get('item_title')
+        save_path = f"/downloads/Séries/{series_name}/Season {season}"
+    else:
+        return jsonify({'status': 'error', 'message': 'Unsupported media type'}), 400
 
-    if not magnet:
-        return jsonify({'status': 'error', 'message': 'Missing magnet link'}), 400
-    
     s = requests.Session()
-    r = s.post(f"{QB_URL}/api/v2/auth/login", data={'username': QB_USERNAME, 'password': QB_PASSWORD})
-
-    if r.status_code != 200:
-        return jsonify({
-            'status': 'error',
-            'message': f"Failed to login to qBittorrent. Check credentials and URL. Status: {r.status_code}, Response: '{r.text.strip()}'"
-        }), 401
-
-    # Determine save path
-    save_path = f"/downloads/Séries/{series_name}/Temporada {season}" if is_series else "/downloads/Filmes"
+    try:
+        r = s.post(f"{QB_URL}/api/v2/auth/login", data={'username': QB_USERNAME, 'password': QB_PASSWORD})
+        r.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        return jsonify({'status': 'error', 'message': f"Failed to login to qBittorrent: {e}"}), 401
 
     data = {
         'urls': magnet,
         'savepath': save_path
     }
-    r = s.post(f"{QB_URL}/api/v2/torrents/add", data=data)
+    
+    try:
+        r = s.post(f"{QB_URL}/api/v2/torrents/add", data=data)
+        r.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        return jsonify({'status': 'error', 'message': f"Failed to add torrent: {e}"}), 400
 
-    if r.status_code == 200:
-        return jsonify({'status': 'success'})
-    else:
-        return jsonify({'status': 'error', 'message': 'Failed to add torrent'}), 400
+    return jsonify({'status': 'success'})
 
 
 # =====================
