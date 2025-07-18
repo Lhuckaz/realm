@@ -15,7 +15,8 @@
             <h1>🧲🎬 Realm</h1>
         </a>
         <form method="POST" class="search-form">
-            <input type="text" name="query" placeholder="Enter movie or series name" required value="{{ query or '' }}">
+            <input type="text" autocomplete="off" name="query" placeholder="Enter movie or series name" required
+                value="{{ query or '' }}">
             <button type="submit">Search</button>
         </form>
 
