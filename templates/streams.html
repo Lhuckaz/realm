@@ -38,10 +38,28 @@
             {% for stream in streams %}
             <div class="stream">
                 <h4>{{ stream.get('name', 'No Name') }}</h4>
-                <div class="breakline"><b>Title:</b> {{ stream.get('title', 'No Title').split('👤')[0].strip() }}</div>
-                <div>👤{{ stream.get('title').split('👤')[1].split('💾')[0].strip() }}</div>
-                <div>💾{{ stream.get('title').split('💾')[1].split('⚙️')[0].strip() }}</div>
-                <div>⚙️{{ stream.get('title').split('⚙️')[1].strip() }}</div>
+                {% set title = stream.get('title', 'No Title') %}
+                <div class="breakline"><b>Title:</b> {{ title.split('👤')[0].strip() }}</div>
+
+                {% if '👤' in title %}
+                <div>👤{{ title.split('👤')[1].split('💾')[0].strip() }}</div>
+                {% else %}
+                <div>👤 N/A</div>
+                {% endif %}
+
+
+                {% if '💾' in title %}
+                <div>💾{{ title.split('💾')[1].split('⚙️')[0].strip() }}</div>
+                {% else %}
+                <div>💾 N/A</div>
+                {% endif %}
+
+                {% if '⚙️' in title %}
+                <div>⚙️{{ title.split('⚙️')[1].strip() }}</div>
+                {% else %}
+                <div>⚙️ N/A</div>
+                {% endif %}
+
                 <div class="infohash"><b>InfoHash:</b>
                     <p>{{ stream.get('infoHash', 'N/A') }}</p>
                 </div>
@@ -60,7 +78,8 @@
                         qBittorrent</button>
                     {% else %}
                     <button data-original-text="🚀 Send to qBittorrent"
-                        onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}', null, null, '{{ imdb_id }}', this)">🚀 Send to
+                        onclick="sendToQB('{{ stream.magnet_link }}', '{{is_series}}', null, null, '{{ imdb_id }}', this)">🚀
+                        Send to
                         qBittorrent</button>
                     {% endif %}
                 </div>

@@ -24,7 +24,7 @@ TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 TMDB_API_BASE_URL = os.getenv("TMDB_API_BASE_URL")
 TMDB_IMAGE_BASE_URL = os.getenv("TMDB_IMAGE_BASE_URL")
 PLACEHOLDER_IMAGE_URL = os.getenv("PLACEHOLDER_IMAGE_URL")
-TORRENT_BASE_URL = os.getenv("TORRENT_BASE_URL")
+TORRENT_BASE_URLS = [url.strip() for url in os.getenv("TORRENT_BASE_URLS", "").split(",") if url.strip()]
 QB_URL = os.getenv("QB_URL")
 QB_USERNAME = os.getenv("QB_USERNAME")
 QB_PASSWORD = os.getenv("QB_PASSWORD")
@@ -32,7 +32,7 @@ QB_PASSWORD = os.getenv("QB_PASSWORD")
 # Validate required environment variables
 for var in [
     "TMDB_API_KEY", "TMDB_API_BASE_URL", "TMDB_IMAGE_BASE_URL",
-    "PLACEHOLDER_IMAGE_URL", "TORRENT_BASE_URL", "QB_URL", "QB_USERNAME", "QB_PASSWORD"
+    "PLACEHOLDER_IMAGE_URL", "TORRENT_BASE_URLS", "QB_URL", "QB_USERNAME", "QB_PASSWORD"
 ]:
     if not os.getenv(var):
         raise Exception(f"{var} is not set in the environment variables.")
@@ -111,8 +111,8 @@ def index():
 
 @app.route("/streams/<imdb_id>")
 def streams(imdb_id):
-    url = f"{TORRENT_BASE_URL}movie/{imdb_id}.json"
-    return fetch_and_display_streams(url, imdb_id, is_series=False)
+    streams, error = fetch_streams_from_urls(f"movie/{imdb_id}.json")
+    return fetch_and_display_streams(streams, error, imdb_id, is_series=False)
 
 
 @app.route("/series/<imdb_id>/<item_title>", methods=["GET", "POST"])
@@ -126,8 +126,8 @@ def series(imdb_id, item_title):
         validation_error = season_error or episode_error
 
     if request.method == "POST" and not validation_error:
-        url = f"{TORRENT_BASE_URL}series/{imdb_id}:{season}:{episode}.json"
-        return fetch_and_display_streams(url, imdb_id, is_series=True, season=season, episode=episode, item_title=item_title)
+        streams, error = fetch_streams_from_urls(f"series/{imdb_id}:{season}:{episode}.json")
+        return fetch_and_display_streams(streams, error, imdb_id, is_series=True, season=season, episode=episode, item_title=item_title)
 
     return render_template("series.html", imdb_id=imdb_id, season=season, episode=episode, validation_error=validation_error)
 
@@ -225,21 +225,43 @@ def send_to_qb():
 # Helper Function
 # =====================
 
-def fetch_and_display_streams(stream_url, imdb_id, is_series=False, season=None, episode=None, item_title=None):
+def fetch_streams_from_urls(path):
     streams = []
     error = None
-
     headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(stream_url, headers=headers)
 
-    if response.status_code == 200:
+    for base_url in TORRENT_BASE_URLS:
+        url = f"{base_url}{path}".replace("|", ",")
         try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
             data = response.json()
-            streams = data.get("streams") if isinstance(data, dict) else data
+            fetched_streams = data.get("streams") if isinstance(data, dict) else data
+            if fetched_streams:
+                streams.extend(fetched_streams)
+        except requests.exceptions.RequestException as e:
+            error = f"Failed to fetch streams from {base_url}: {e}"
         except Exception as e:
-            error = f"Error parsing JSON: {e}"
-    else:
-        error = f"Failed to fetch streams: {response.status_code}"
+            error = f"Error parsing JSON from {base_url}: {e}"
+    
+    if not streams:
+        error = "No streams found from any provider."
+
+    return streams, error
+
+
+def fetch_and_display_streams(streams, error, imdb_id, is_series=False, season=None, episode=None, item_title=None):
+    if error:
+        return render_template(
+            "streams.html",
+            imdb_id=imdb_id,
+            streams=[],
+            error=error,
+            is_series=is_series,
+            season=season,
+            episode=episode,
+            item_title=item_title
+        )
 
     for stream in streams:
         title = stream.get("title", "")
@@ -255,7 +277,7 @@ def fetch_and_display_streams(stream_url, imdb_id, is_series=False, season=None,
         "streams.html",
         imdb_id=imdb_id,
         streams=streams,
-        error=error,
+        error=None,
         is_series=is_series,
         season=season,
         episode=episode,

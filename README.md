@@ -74,7 +74,7 @@ To get Realm up and running, you'll need Docker installed on your system.
 
     # --- Public Stream API ---
     # Default public stream instance.
-    TORRENT_BASE_URL="https://public-stream-api.fake-domain.com/streams/v1/"
+    TORRENT_BASE_URLS="https://public-stream-api.fake-domain.com/streams/v1/,https://another-stream-api.fake-domain.com/streams/v1/"
     # List of public trackers to append to magnet links
     TRACKERS_LIST_URL="https://raw.fake-githubusercontent.com/fake-trackers/list/master/trackers_best.txt"
     ```
@@ -91,7 +91,7 @@ To get Realm up and running, you'll need Docker installed on your system.
     -e TMDB_API_BASE_URL="https://api.fake-filmdata.org/3/" \
     -e TMDB_IMAGE_BASE_URL="https://image.fake-filmdata.org/t/p/" \
     -e PLACEHOLDER_IMAGE_URL="https://fake-placehold.co/120x180?text=No+Poster" \
-    -e TORRENT_BASE_URL="https://public-stream-api.fake-domain.com/streams/v1/" \
+    -e TORRENT_BASE_URLS="https://public-stream-api.fake-domain.com/streams/v1/,https://another-stream-api.fake-domain.com/streams/v1/" \
     -e TRACKERS_LIST_URL="https://raw.fake-githubusercontent.com/fake-trackers/list/master/trackers_best.txt" \
     realm
     ```
